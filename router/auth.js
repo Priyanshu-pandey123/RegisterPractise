@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const User = require('../model/userSchema');
+const Group = require('../model/groupSchema');
+const Note = require('../model/noteSchema');
 
 const router = express.Router();
 
@@ -8,60 +9,36 @@ router.get('/', (req, res) => {
   res.send('Welcome to the user registration API');
 });
 
-router.post('/register', async (req, res) => {
-  const { name, email, phone, work, password } = req.body;
-
-  try {
-    const existingUser = await User.findOne({ email: email }); // Corrected typo
-    if (existingUser) {
-      return res.status(422).json({ error: "Email already exists" });
-    } else {
-      const newUser = new User({ name, email, phone, work, password });
-      await newUser.save();
-      return res.status(201).json({ message: "User registered successfully" });
-    }
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: "Server error" });
-  }
+router.post('/groups', async (req, res) => {
+  const group = new Group(req.body);
+  await group.save();
+  res.status(201).send(group);
 });
 
 
 
-router.post('/signin',async (req,res)=>{
-   
-   try{
-    const {email,password}=req.body;
-    const user= await User.findOne({email:email});
-        if(user){
-          
-            if(user.password != password){
-                return res.json({message:"wrong password"});
-
-            }
-
-
-           return res.json({message:"user login  successfully"});
-        }
-
-        return res.json({message:"user email not founded"});
-   }catch(err){
-    console.log(err);
-   }
-
-})
+router.get('/groups', async (req, res) => {
+  const groups = await Group.find();
+  res.send(groups);
+});
 
 
 
+router.post('/notes', async (req, res) => {
+  const note = new Note(req.body);
+  await note.save();
+  res.status(201).send(note);
+});
 
-
-
-
-
-
-
-
-
+router.get('/notes/:groupId', async (req, res) => {
+  const notes = await Note.find({ groupId: req.params.groupId });
+  res.send(notes);
+});
 
 
 module.exports = router;
+
+
+
+
+ 
